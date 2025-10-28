@@ -10,3 +10,5 @@ lightgbm
 joblib==1.3.2
 mlflow
 python-multipart==0.0.6
+streamlit
+plotly
