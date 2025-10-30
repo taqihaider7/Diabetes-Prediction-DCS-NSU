@@ -430,7 +430,8 @@ if page == "🔮 Single Prediction":
             features_dict['N15'] = st.number_input("Feature N15", value=0.0, step=0.01)
             
             st.markdown("**Load from Sample Data:**")
-            if sample_data is not None and st.button("📥 Load Random Sample", use_container_width=True, width='stretch'):
+            if sample_data is not None and st.button("📥 Load Random Sample",
+             width='stretch'):
                 sample = sample_data.iloc[np.random.randint(0, len(sample_data))]
                 for col in FEATURE_COLUMNS:
                     if col in sample.index:
@@ -443,7 +444,8 @@ if page == "🔮 Single Prediction":
     col1, col2, col3 = st.columns([2, 1, 2])
     
     with col1:
-        if st.button("🔮 Make Prediction", use_container_width=True, width='stretch', type="primary"):
+        if st.button("🔮 Make Prediction",
+         width='stretch', type="primary"):
             # Validate features
             is_valid, validation_msg = validate_features(features_dict)
             
@@ -463,7 +465,8 @@ if page == "🔮 Single Prediction":
                     }
     
     with col3:
-        if st.button("🔄 Reset Form", use_container_width=True, width='stretch'):
+        if st.button("🔄 Reset Form",
+         width='stretch'):
             st.rerun()
     
     # Display prediction results
@@ -533,7 +536,8 @@ if page == "🔮 Single Prediction":
                 }
             ))
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True, width='stretch')
+            st.plotly_chart(fig,
+             width='stretch')
         
         with col2:
             # Class probability bar chart
@@ -558,7 +562,8 @@ if page == "🔮 Single Prediction":
                 height=400,
                 showlegend=False
             )
-            st.plotly_chart(fig, use_container_width=True, width='stretch')
+            st.plotly_chart(fig,
+             width='stretch')
         
         # Timestamp
         st.caption(f"Prediction made at: {pred['timestamp']}")
@@ -583,7 +588,8 @@ elif page == "📊 Batch Prediction":
             
             st.success(f"✓ File uploaded: {len(df)} rows")
             st.markdown("### 📋 Data Preview")
-            st.dataframe(df.head(10), use_container_width=True, width='stretch')
+            st.dataframe(df.head(10),
+             width='stretch')
             
             # Check for required columns
             missing_cols = set(FEATURE_COLUMNS) - set(df.columns)
@@ -594,7 +600,8 @@ elif page == "📊 Batch Prediction":
                 st.success("✓ All required columns present")
                 
                 # Make batch predictions
-                if st.button("🔮 Make Batch Predictions", type="primary", use_container_width=True, width='stretch'):
+                if st.button("🔮 Make Batch Predictions", type="primary",
+                 width='stretch'):
                     progress_bar = st.progress(0)
                     predictions_list = []
                     
@@ -628,7 +635,8 @@ elif page == "📊 Batch Prediction":
                     st.markdown("### 📊 Batch Prediction Results")
                     
                     results_df = pd.DataFrame(predictions_list)
-                    st.dataframe(results_df, use_container_width=True, width='stretch')
+                    st.dataframe(results_df,
+                     width='stretch')
                     
                     # Statistics
                     col1, col2, col3, col4 = st.columns(4)
@@ -724,7 +732,8 @@ elif page == "📈 Data Analysis":
         
         # Basic statistics
         st.markdown("### 📊 Statistical Summary")
-        st.dataframe(sample_data[FEATURE_COLUMNS].describe(), use_container_width=True)
+        st.dataframe(sample_data[FEATURE_COLUMNS].describe(),
+        
         
         # Visualizations
         st.markdown("### 📈 Feature Distributions")
@@ -749,7 +758,8 @@ elif page == "📈 Data Analysis":
                         title=f"Distribution of {feat}",
                         labels={feat: feat}
                     )
-                    st.plotly_chart(fig, use_container_width=True, width='stretch')
+                    st.plotly_chart(fig,
+                     width='stretch')
             
             with col2:
                 # Box plots
@@ -759,7 +769,8 @@ elif page == "📈 Data Analysis":
                         y=feat,
                         title=f"Box Plot of {feat}"
                     )
-                    st.plotly_chart(fig, use_container_width=True, width='stretch')
+                    st.plotly_chart(fig,
+                     width='stretch')
         
         # Correlation analysis
         st.markdown("### 🔗 Feature Correlations")
@@ -772,7 +783,8 @@ elif page == "📈 Data Analysis":
                 aspect="auto",
                 height=800
             )
-            st.plotly_chart(fig, use_container_width=True, width='stretch')
+            st.plotly_chart(fig,
+             width='stretch')
     else:
         st.warning("⚠️ Processed data not available for analysis")
 
