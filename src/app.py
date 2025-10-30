@@ -732,8 +732,8 @@ elif page == "📈 Data Analysis":
         
         # Basic statistics
         st.markdown("### 📊 Statistical Summary")
-        st.dataframe(sample_data[FEATURE_COLUMNS].describe(),
-        
+        st.dataframe(sample_data[FEATURE_COLUMNS].describe())
+
         
         # Visualizations
         st.markdown("### 📈 Feature Distributions")
