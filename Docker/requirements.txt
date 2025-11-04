@@ -1,0 +1,5 @@
+Flask
+pandas
+numpy
+scikit-learn
+gunicorn # Recommended for production deployment instead of flask's built-in server

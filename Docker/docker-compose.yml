@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  model_api:
+    build: .
+    container_name: diabetes_model_api
+    restart: always # Keep the service running
+    ports:
+      - "5000:5000" # Map host port 5000 to container port 5000
+    environment:
+      # You can pass environment variables here if needed
+      PYTHONUNBUFFERED: 1
