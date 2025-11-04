@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  train_model:
+    cmd: python src/train_model.py
+    deps:
+    - path: Data/diabetes.csv
+      hash: md5
+      md5: f2906818eda8fcfc8f8416557ab1e6df
+      size: 23873
+    outs:
+    - path: Docker/best_diabetes_model.pkl
+      hash: md5
+      md5: 5383645157d5c73c7e3692e5197383a6
+      size: 1673543
+    - path: Docker/scaler.pkl
+      hash: md5
+      md5: 76b371a30f4374f4022e5b49172f4710
+      size: 833
