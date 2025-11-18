@@ -1,2 +1,5 @@
 [core]
     autostage = true
+    remote = nawaz
+['remote "nawaz"']
+    url = https://dagshub.com/taqihaider7/Diabetes-Prediction-DCS-NSU.dvc
