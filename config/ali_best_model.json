@@ -1,0 +1,7 @@
+{
+  "tracking_uri": "https://dagshub.com/taqihaider7/Diabetes-Prediction-DCS-NSU.mlflow",
+  "experiment_name": "Ali_Diabetes_Experiments",
+  "run_id": "1ef02dfc9e304569bdba5ec43dc89b96",
+  "artifact_name": "knn_model.pkl",
+  "selected_by": "f1_score"
+}

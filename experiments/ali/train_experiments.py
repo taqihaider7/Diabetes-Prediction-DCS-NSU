@@ -18,7 +18,7 @@ if tracking_uri is None:
     raise ValueError("MLFLOW_TRACKING_URI is not set. Please export it in your terminal.")
 
 mlflow.set_tracking_uri(tracking_uri)
-mlflow.set_experiment("ali_diabetes_experiments")
+mlflow.set_experiment("Ali_Diabetes_Experiments")
 
 
 # ========= 2. Load YOUR processed data (ali_data) =========
@@ -43,21 +43,24 @@ y_test = test_df["Outcome"]
 
 def run_and_log(model, model_name, params=None):
     with mlflow.start_run(run_name=model_name):
-        # Train
-        model.fit(X_train, y_train)
+        mlflow.set_tag("run_by", "Ali Rehan")
 
-        # Predict
+        model.fit(X_train, y_train)
         preds = model.predict(X_test)
         acc = accuracy_score(y_test, preds)
         f1 = f1_score(y_test, preds)
 
-        # Log params
+        # ---- generic params ----
         mlflow.log_param("model_type", model_name)
+        mlflow.log_param("data_samples", len(train_df) + len(test_df))
+        mlflow.log_param("features", X_train.shape[1])
+        mlflow.log_param("trained_on", "ali_data_processed")
+
+        # extra model-specific params
         if params:
             for k, v in params.items():
                 mlflow.log_param(k, v)
 
-        # Log metrics
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("f1_score", f1)
 
@@ -73,29 +76,64 @@ def run_and_log(model, model_name, params=None):
 # ========= 4. Run 4 Different Models =========
 
 # 1. Logistic Regression
+log_reg = LogisticRegression(max_iter=300, solver="lbfgs")
+
 run_and_log(
-    LogisticRegression(max_iter=300),
+    log_reg,
     "logistic_regression",
-    params={"max_iter": 300}
+    params={
+        "param_max_iter": 300,
+        "param_solver": "lbfgs"
+    }
 )
 
 # 2. Random Forest
+rf = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=None,
+    random_state=42,
+    max_features="sqrt"
+)
+
 run_and_log(
-    RandomForestClassifier(n_estimators=200, random_state=42),
+    rf,
     "random_forest",
-    params={"n_estimators": 200}
+    params={
+        "param_n_estimators": 200,
+        "param_max_depth": "None",
+        "param_max_features": "sqrt",
+        "param_random_state": 42
+    }
 )
 
 # 3. KNN
+knn = KNeighborsClassifier(n_neighbors=5, weights="uniform")
+
 run_and_log(
-    KNeighborsClassifier(n_neighbors=5),
+    knn,
     "knn",
-    params={"n_neighbors": 5}
+    params={
+        "param_n_neighbors": 5,
+        "param_weights": "uniform"
+    }
 )
 
 # 4. Gradient Boosting
-run_and_log(
-    GradientBoostingClassifier(),
-    "gradient_boosting",
-    params={}
+gb = GradientBoostingClassifier(
+    n_estimators=100,
+    learning_rate=0.1,
+    max_depth=3,
+    random_state=42
 )
+
+run_and_log(
+    gb,
+    "gradient_boosting",
+    params={
+        "param_n_estimators": 100,
+        "param_learning_rate": 0.1,
+        "param_max_depth": 3,
+        "param_random_state": 42
+    }
+)
+
