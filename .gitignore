@@ -1,2 +1,7 @@
+venv/
+*.pkl
+__pycache__/
+*.log
+*.pyc
 
 /data
