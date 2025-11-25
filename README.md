@@ -747,8 +747,8 @@ For issues, questions, or suggestions:
 
 **Course**: Distributed Computing System (DCS)  
 **Semester**: 3rd Semester  
-**University**: North South University (NSU)  
-**Project Type**: Machine Learning Capstone Project  
+**University**: Novosibirsk State University, Russia (NSU)  
+**Project Type**: Machine Learning Operations Capstone Project  
 
 ---
 
