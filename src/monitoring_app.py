@@ -96,7 +96,7 @@ with st.sidebar:
     st.markdown("### 🔄 Refresh")
     auto_refresh = st.checkbox("Auto-refresh (30s)", value=False)
     
-    if st.button("🔄 Refresh Now", use_container_width=True):
+    if st.button("🔄 Refresh Now", width='stretch'):
         st.rerun()
     
     if auto_refresh:
@@ -108,7 +108,7 @@ with st.sidebar:
     
     # Export options
     st.markdown("### 💾 Export")
-    if st.button("Export Metrics", use_container_width=True):
+    if st.button("Export Metrics", width='stretch'):
         filepath = metrics_collector.export_metrics()
         st.success(f"✓ Exported to: {os.path.basename(filepath)}")
         
@@ -118,11 +118,11 @@ with st.sidebar:
                 data=f.read(),
                 file_name=f"metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
-                use_container_width=True
+                width=True
             )
     
     # Reset metrics
-    if st.button("🗑️ Reset Metrics", use_container_width=True):
+    if st.button("🗑️ Reset Metrics", width='stretch'):
         metrics_collector.reset_metrics()
         st.success("✓ Metrics reset")
         st.rerun()
@@ -198,7 +198,7 @@ if page == "📊 Overview":
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("📊 No predictions yet. Start making predictions to see distribution.")
     
@@ -230,7 +230,7 @@ if page == "📊 Overview":
         )
         fig.update_traces(texttemplate='%{text:.1f}', textposition='outside')
         fig.update_layout(height=350, showlegend=True)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     
     st.divider()
     
@@ -262,7 +262,7 @@ if page == "📊 Overview":
             height=400,
             hovermode='x unified'
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     else:
         st.info("📊 No predictions yet. Start making predictions to see timeline.")
 
@@ -313,7 +313,7 @@ elif page == "🎯 Inference Metrics":
                 height=350,
                 showlegend=False
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         with col2:
             st.markdown("### 📈 Distribution Percentage")
@@ -327,7 +327,7 @@ elif page == "🎯 Inference Metrics":
                     hole=0.4
                 )])
                 fig.update_layout(height=350)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
     else:
         st.info("📊 No predictions yet.")
 
@@ -377,7 +377,7 @@ elif page == "⚠️ Error Analysis":
                     }
                 ))
                 fig.update_layout(height=300)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
         
         with col2:
             # Error types pie chart
@@ -394,7 +394,7 @@ elif page == "⚠️ Error Analysis":
                     textinfo='label+percent'
                 )])
                 fig.update_layout(height=300, showlegend=False)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
 # ==================== PAGE: Performance ====================
 elif page == "🚀 Performance":
@@ -438,7 +438,7 @@ elif page == "🚀 Performance":
             height=350,
             showlegend=False
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     
     with col2:
         # Latency distribution
@@ -458,7 +458,7 @@ elif page == "🚀 Performance":
                 height=350,
                 showlegend=False
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("No latency data available yet")
 
@@ -476,7 +476,7 @@ elif page == "📝 Recent Activity":
         filter_type = st.selectbox("Filter by", ["All", "Successful", "Failed"])
     
     with col3:
-        if st.button("🔄 Refresh", use_container_width=True):
+        if st.button("🔄 Refresh", width='stretch'):
             st.rerun()
     
     # Get predictions from shared storage
@@ -511,7 +511,7 @@ elif page == "📝 Recent Activity":
         
         st.dataframe(
             df_display,
-            use_container_width=True,
+            width=True,
             hide_index=True,
             height=600
         )
@@ -566,7 +566,7 @@ elif page == "📈 Analytics":
             )
             fig.update_traces(line_color='#667eea', line_width=2)
             fig.update_layout(height=350)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width=True)
         
         with col2:
             # Success rate over time
@@ -583,7 +583,7 @@ elif page == "📈 Analytics":
             fig.update_traces(line_color='#51cf66', line_width=2)
             fig.update_yaxis(range=[0, 100])
             fig.update_layout(height=350)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width=True)
         
         st.divider()
         
@@ -609,7 +609,7 @@ elif page == "📈 Analytics":
                     height=300,
                     showlegend=False
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width=True)
         
         with col2:
             # Confidence distribution
@@ -627,7 +627,7 @@ elif page == "📈 Analytics":
                     height=300,
                     showlegend=False
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width=True)
         
         with col3:
             # Latency box plot
@@ -649,7 +649,7 @@ elif page == "📈 Analytics":
                 height=300,
                 showlegend=True
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width=True)
         
         st.divider()
         
@@ -670,7 +670,7 @@ elif page == "📈 Analytics":
                 title='Correlation Matrix (Successful Predictions)'
             )
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width=True)
     else:
         st.info("📊 Not enough data for analytics. Make more predictions to see insights.")
 
@@ -703,7 +703,7 @@ elif page == "⚙️ Configuration":
         ]
     }
     
-    st.dataframe(pd.DataFrame(config_data), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(config_data), width=True, hide_index=True)
     
     st.divider()
     
@@ -736,7 +736,7 @@ elif page == "⚙️ Configuration":
     """)
     
     # Test connection button
-    if st.button("🔌 Test Grafana Cloud Connection", use_container_width=True):
+    if st.button("🔌 Test Grafana Cloud Connection", width='stretch'):
         if DEFAULT_CONFIG.loki_enabled:
             try:
                 import requests
@@ -777,7 +777,7 @@ elif page == "⚙️ Configuration":
         ]
     }
     
-    st.dataframe(pd.DataFrame(system_info), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(system_info), width='stretch', hide_index=True)
 
 # Footer
 st.divider()
