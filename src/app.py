@@ -9,20 +9,27 @@ Features:
 - Data visualization and statistics
 - Confidence indicators and explanations
 - Feature importance analysis
+- Comprehensive monitoring with Loki/Grafana
+- Real-time metrics tracking
 """
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
-import logging
 import os
 import json
+import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 import plotly.graph_objects as go
 import plotly.express as px
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, Tuple, List, Optional
+
+# Import monitoring modules
+from monitoring import setup_loki_logging, get_logger, MetricsCollector, MonitoringDashboard
+from monitoring.config import DEFAULT_CONFIG
 
 # Configure page
 st.set_page_config(
@@ -32,12 +39,41 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Initialize monitoring
+@st.cache_resource
+def initialize_monitoring():
+    """Initialize logging and metrics collection"""
+    # Setup Loki logging (with Grafana Cloud support)
+    loki_url = DEFAULT_CONFIG.loki_url if DEFAULT_CONFIG.loki_enabled else None
+    logger = setup_loki_logging(
+        app_name=DEFAULT_CONFIG.app_name,
+        loki_url=loki_url,
+        environment=DEFAULT_CONFIG.environment,
+        loki_username=DEFAULT_CONFIG.loki_username,
+        loki_api_key=DEFAULT_CONFIG.loki_api_key
+    )
+    
+    # Initialize metrics collector
+    metrics_collector = MetricsCollector(
+        retention_hours=DEFAULT_CONFIG.metrics_retention_hours
+    )
+    
+    logger.info("Monitoring system initialized", extra={
+        'loki_enabled': DEFAULT_CONFIG.loki_enabled,
+        'environment': DEFAULT_CONFIG.environment
+    })
+    
+    return logger, metrics_collector
+
+# Initialize
+logger, metrics_collector = initialize_monitoring()
+
+# Initialize session state for user tracking
+if 'user_session_id' not in st.session_state:
+    st.session_state.user_session_id = str(uuid.uuid4())[:8]
+    logger.info("New user session started", extra={
+        'user_session': st.session_state.user_session_id
+    })
 
 # ==================== Feature Configuration ====================
 FEATURE_COLUMNS = [
@@ -137,32 +173,105 @@ def load_processed_data_sample():
 
 
 # ==================== Prediction Functions ====================
-def make_prediction(features_dict: Dict[str, float]) -> Tuple[int, float, float]:
+def make_prediction(features_dict: Dict[str, float]) -> Tuple[Optional[int], Optional[float], Optional[float], Optional[str]]:
     """
-    Make a single prediction
-    Returns: (prediction, probability, confidence)
+    Make a single prediction with monitoring
+    Returns: (prediction, probability, confidence, prediction_id)
     """
+    prediction_id = str(uuid.uuid4())[:8]
+    start_time = time.time()
+    
     try:
         model, _ = load_model()
         
         if model is None:
+            error_msg = "Model not loaded"
+            latency_ms = (time.time() - start_time) * 1000
+            
+            # Log error
+            logger.error(error_msg, extra={
+                'prediction_id': prediction_id,
+                'user_session': st.session_state.user_session_id,
+                'error_type': 'ModelNotLoaded',
+                'duration_ms': latency_ms
+            })
+            
+            # Record error metric
+            metrics_collector.record_prediction(
+                prediction_value=-1,
+                probability=0.0,
+                confidence=0.0,
+                latency_ms=latency_ms,
+                prediction_id=prediction_id,
+                user_session=st.session_state.user_session_id,
+                success=False,
+                error_type='ModelNotLoaded'
+            )
+            
             st.error("❌ Model not loaded. Please check the models directory.")
-            return None, None, None
+            return None, None, None, None
         
         # Prepare feature array in correct order
         feature_array = np.array([features_dict[col] for col in FEATURE_COLUMNS]).reshape(1, -1)
         
         # Make prediction
         prediction = model.predict(feature_array)[0]
-        probability = model.predict_proba(feature_array)[0][1]
-        confidence = max(model.predict_proba(feature_array)[0])
+        prediction_proba = model.predict_proba(feature_array)[0]
+        probability = float(prediction_proba[1])
+        confidence = float(np.max(prediction_proba))
         
-        return int(prediction), float(probability), float(confidence)
+        # Calculate latency
+        latency_ms = (time.time() - start_time) * 1000
+        
+        # Log successful prediction
+        logger.info("Prediction successful", extra={
+            'prediction_id': prediction_id,
+            'user_session': st.session_state.user_session_id,
+            'prediction_result': int(prediction),
+            'probability': probability,
+            'confidence': confidence,
+            'duration_ms': latency_ms
+        })
+        
+        # Record successful metric
+        metrics_collector.record_prediction(
+            prediction_value=int(prediction),
+            probability=probability,
+            confidence=confidence,
+            latency_ms=latency_ms,
+            prediction_id=prediction_id,
+            user_session=st.session_state.user_session_id,
+            success=True
+        )
+        
+        return int(prediction), probability, confidence, prediction_id
     
     except Exception as e:
-        logger.error(f"Error making prediction: {str(e)}")
+        latency_ms = (time.time() - start_time) * 1000
+        error_type = type(e).__name__
+        
+        # Log error
+        logger.error(f"Prediction failed: {str(e)}", extra={
+            'prediction_id': prediction_id,
+            'user_session': st.session_state.user_session_id,
+            'error_type': error_type,
+            'duration_ms': latency_ms
+        }, exc_info=True)
+        
+        # Record error metric
+        metrics_collector.record_prediction(
+            prediction_value=-1,
+            probability=0.0,
+            confidence=0.0,
+            latency_ms=latency_ms,
+            prediction_id=prediction_id,
+            user_session=st.session_state.user_session_id,
+            success=False,
+            error_type=error_type
+        )
+        
         st.error(f"❌ Prediction error: {str(e)}")
-        return None, None, None
+        return None, None, None, None
 
 
 def validate_features(features_dict: Dict[str, float]) -> Tuple[bool, str]:
@@ -307,6 +416,18 @@ with st.sidebar:
     
     st.divider()
     
+    # Monitoring status
+    st.markdown("### 📊 Monitoring Status")
+    summary = metrics_collector.get_metrics_summary()
+    st.caption(f"Total Predictions: {summary['total_predictions']}")
+    st.caption(f"Success Rate: {summary['success_rate_percent']:.1f}%")
+    st.caption(f"Avg Latency: {summary['latency']['mean_ms']:.1f} ms")
+    
+    # Link to monitoring app
+    st.markdown("**[📊 Open Monitoring Dashboard →](http://localhost:8502)**")
+    
+    st.divider()
+    
     st.markdown("### 📋 Quick Guide")
     st.caption("""
     1. **Single Prediction**: Predict for one patient
@@ -444,8 +565,7 @@ if page == "🔮 Single Prediction":
     col1, col2, col3 = st.columns([2, 1, 2])
     
     with col1:
-        if st.button("🔮 Make Prediction",
-         width='stretch', type="primary"):
+        if st.button("🔮 Make Prediction", use_container_width=True, type="primary"):
             # Validate features
             is_valid, validation_msg = validate_features(features_dict)
             
@@ -453,7 +573,7 @@ if page == "🔮 Single Prediction":
                 st.error(validation_msg)
             else:
                 # Make prediction
-                prediction, probability, confidence = make_prediction(features_dict)
+                prediction, probability, confidence, prediction_id = make_prediction(features_dict)
                 
                 if prediction is not None:
                     st.session_state.prediction_made = True
@@ -461,12 +581,12 @@ if page == "🔮 Single Prediction":
                         'prediction': prediction,
                         'probability': probability,
                         'confidence': confidence,
+                        'prediction_id': prediction_id,
                         'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     }
     
     with col3:
-        if st.button("🔄 Reset Form",
-         width='stretch'):
+        if st.button("🔄 Reset Form", use_container_width=True):
             st.rerun()
     
     # Display prediction results
@@ -783,8 +903,7 @@ elif page == "📈 Data Analysis":
                 aspect="auto",
                 height=800
             )
-            st.plotly_chart(fig,
-             width='stretch')
+            st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("⚠️ Processed data not available for analysis")
 
@@ -793,7 +912,9 @@ elif page == "📈 Data Analysis":
 st.divider()
 st.markdown("""
     ---
-    **Diabetes Prediction System v1.0** | Built with Streamlit & XGBoost
+    **Diabetes Prediction System v1.0** | Built with Streamlit & XGBoost | Monitored with Grafana Cloud
     
     *Disclaimer: This application is for educational purposes. Always consult with healthcare professionals for medical decisions.*
+    
+    **Monitoring Dashboard:** Run `streamlit run monitoring_app.py --server.port 8502` in a separate terminal
 """)
