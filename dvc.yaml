@@ -1,8 +1,0 @@
-stages:
-  train_model:
-    cmd: python src/train_model.py
-    deps:
-    - Data/diabetes.csv
-    outs:
-    - Docker/best_diabetes_model.pkl
-    - Docker/scaler.pkl

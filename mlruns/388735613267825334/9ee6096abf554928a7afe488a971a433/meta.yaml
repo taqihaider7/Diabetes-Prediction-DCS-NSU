@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/388735613267825334/9ee6096abf554928a7afe488a971a433/artifacts
+end_time: 1764209907861
+entry_point_name: ''
+experiment_id: '388735613267825334'
+lifecycle_stage: active
+run_id: 9ee6096abf554928a7afe488a971a433
+run_name: rare-grouse-146
+run_uuid: 9ee6096abf554928a7afe488a971a433
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764209890681
+status: 3
+tags: []
+user_id: nawaz
