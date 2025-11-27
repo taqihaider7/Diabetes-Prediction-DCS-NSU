@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/388735613267825334/9bbda038591940fa8f689d555c72860d/artifacts
+end_time: 1764212988030
+entry_point_name: ''
+experiment_id: '388735613267825334'
+lifecycle_stage: active
+run_id: 9bbda038591940fa8f689d555c72860d
+run_name: skittish-sponge-47
+run_uuid: 9bbda038591940fa8f689d555c72860d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764212968879
+status: 3
+tags: []
+user_id: nawaz

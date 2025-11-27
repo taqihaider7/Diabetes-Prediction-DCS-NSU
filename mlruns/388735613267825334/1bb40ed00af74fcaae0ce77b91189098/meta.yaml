@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/388735613267825334/1bb40ed00af74fcaae0ce77b91189098/artifacts
+end_time: 1764212825903
+entry_point_name: ''
+experiment_id: '388735613267825334'
+lifecycle_stage: active
+run_id: 1bb40ed00af74fcaae0ce77b91189098
+run_name: bedecked-lynx-5
+run_uuid: 1bb40ed00af74fcaae0ce77b91189098
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764212805065
+status: 3
+tags: []
+user_id: nawaz

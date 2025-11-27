@@ -220,7 +220,10 @@ class DiabetesModelTrainer:
         self.model = None
         self.scaler = StandardScaler()
         self.best_score = 0
-        
+            # Add these DAGsHub configurations:
+        self.DAGSHUB_USERNAME = "taqihaider7"
+        self.DAGSHUB_REPOSITORY = "Diabetes-Prediction-DCS-NSU"
+        self.DAGSHUB_TRACKING_URI = f"https://dagshub.com/{self.DAGSHUB_USERNAME}/{self.DAGSHUB_REPOSITORY}.mlflow"
         # Configuration - Use relative paths to avoid Windows path issues
         self.MLFLOW_TRACKING_URI = "mlruns"  # Relative path
         self.MLFLOW_EXPERIMENT_NAME = "diabetes_prediction"
@@ -255,8 +258,16 @@ class DiabetesModelTrainer:
         
         return X, y
     
-    def train_model(self):
+    def train_model(self, use_dagshub=False):
         """Train the model with MLflow tracking"""
+        if use_dagshub:
+           self.setup_dagshub_tracking()
+        else:
+          mlflow.set_tracking_uri(self.MLFLOW_TRACKING_URI)
+    
+    # Rest of your existing train_model code...
+        mlflow.set_experiment(self.MLFLOW_EXPERIMENT_NAME)
+
         # Set up MLflow
         mlflow.set_tracking_uri(self.MLFLOW_TRACKING_URI)
         mlflow.set_experiment(self.MLFLOW_EXPERIMENT_NAME)
@@ -344,6 +355,10 @@ class DiabetesModelTrainer:
         
         joblib.dump(model_dict, model_path)
         print(f"✅ Best model saved to {model_path}")
+def setup_dagshub_tracking(self):
+    """Setup MLflow to use DAGsHub as tracking server"""
+    mlflow.set_tracking_uri(self.DAGSHUB_TRACKING_URI)
+    print(f"🔗 MLflow tracking set to DAGsHub: {self.DAGSHUB_TRACKING_URI}")
 
 def register_model_dagshub():
     """Register the best model for DAGsHub (manual integration)"""
@@ -382,12 +397,87 @@ def register_model_dagshub():
         
     except Exception as e:
         print(f"Error in model registration: {e}")
+def register_model_dagshub():
+    """Register the best model for DAGsHub (manual integration)"""
+    mlflow.set_tracking_uri("mlruns")
+    experiment_name = "diabetes_prediction"
+    
+    try:
+        # Search for the best run
+        experiment = mlflow.get_experiment_by_name(experiment_name)
+        if experiment is None:
+            print("No experiment found")
+            return
+        
+        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
+        if runs.empty:
+            print("No runs found in experiment")
+            return
+            
+        best_run = runs.loc[runs['metrics.accuracy'].idxmax()]
+        
+        print(f"Best run ID: {best_run.run_id}")
+        print(f"Best accuracy: {best_run['metrics.accuracy']:.4f}")
+        
+        # Model URI for registration
+        model_uri = f"runs:/{best_run.run_id}/random_forest_model"
+        
+        print("=" * 50)
+        print("DAGsHub Registration Instructions:")
+        print("1. Set up your DAGsHub repository")
+        print("2. Configure MLflow tracking URI:")
+        print("   mlflow.set_tracking_uri('https://dagshub.com/<username>/<repository>.mlflow')")
+        print("3. Use this model URI to register:")
+        print(f"   Model URI: {model_uri}")
+        print("4. Run: mlflow.register_model(model_uri, 'diabetes-prediction-model')")
+        print("=" * 50)
+        
+    except Exception as e:
+        print(f"Error in model registration: {e}")
 
+def register_model_dagshub(self):
+    """Register the best model for DAGsHub (manual integration)"""
+    mlflow.set_tracking_uri("mlruns")
+    experiment_name = "diabetes_prediction"
+    
+    try:
+        # Search for the best run
+        experiment = mlflow.get_experiment_by_name(experiment_name)
+        if experiment is None:
+            print("No experiment found")
+            return
+        
+        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
+        if runs.empty:
+            print("No runs found in experiment")
+            return
+            
+        best_run = runs.loc[runs['metrics.accuracy'].idxmax()]
+        
+        print(f"Best run ID: {best_run.run_id}")
+        print(f"Best accuracy: {best_run['metrics.accuracy']:.4f}")
+        
+        # Model URI for registration
+        model_uri = f"runs:/{best_run.run_id}/random_forest_model"
+        
+        print("=" * 50)
+        print("DAGsHub Registration Instructions:")
+        print("1. Set up your DAGsHub repository")
+        print("2. Configure MLflow tracking URI:")
+        print("   mlflow.set_tracking_uri('https://dagshub.com/<username>/<repository>.mlflow')")
+        print("3. Use this model URI to register:")
+        print(f"   Model URI: {model_uri}")
+        print("4. Run: mlflow.register_model(model_uri, 'diabetes-prediction-model')")
+        print("=" * 50)
+        
+    except Exception as e:
+        print(f"Error in model registration: {e}")
 if __name__ == "__main__":
     # Train the model
     trainer = DiabetesModelTrainer()
     accuracy = trainer.train_model()
     
     # Show registration instructions
-    if accuracy > 0.7:  # Only register if model is decent
-        register_model_dagshub()
+    if accuracy > 0.7:
+        print("✅ Model trained successfully!")
+        print("💡 For DAGsHub registration, set up your MLflow tracking URI to DAGsHub")

@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/388735613267825334/3178672e36304fa8a32926ec43240556/artifacts
+end_time: 1764210821332
+entry_point_name: ''
+experiment_id: '388735613267825334'
+lifecycle_stage: active
+run_id: 3178672e36304fa8a32926ec43240556
+run_name: sincere-trout-603
+run_uuid: 3178672e36304fa8a32926ec43240556
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764210798755
+status: 3
+tags: []
+user_id: nawaz
