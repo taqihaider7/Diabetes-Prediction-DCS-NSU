@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/388735613267825334/1ee6f3cc27b340e9b1cbfebee9700b26/artifacts
+end_time: 1764214765325
+entry_point_name: ''
+experiment_id: '388735613267825334'
+lifecycle_stage: active
+run_id: 1ee6f3cc27b340e9b1cbfebee9700b26
+run_name: thoughtful-bee-823
+run_uuid: 1ee6f3cc27b340e9b1cbfebee9700b26
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764214746958
+status: 3
+tags: []
+user_id: nawaz
