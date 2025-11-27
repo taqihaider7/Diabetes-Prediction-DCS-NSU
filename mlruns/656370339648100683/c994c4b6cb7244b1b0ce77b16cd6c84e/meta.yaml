@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/656370339648100683/c994c4b6cb7244b1b0ce77b16cd6c84e/artifacts
+end_time: 1764219009177
+entry_point_name: ''
+experiment_id: '656370339648100683'
+lifecycle_stage: active
+run_id: c994c4b6cb7244b1b0ce77b16cd6c84e
+run_name: youthful-smelt-809
+run_uuid: c994c4b6cb7244b1b0ce77b16cd6c84e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764218979423
+status: 3
+tags: []
+user_id: nawaz

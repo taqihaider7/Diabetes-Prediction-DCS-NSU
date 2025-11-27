@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/656370339648100683/b78aefd455b34851a7d4f70bf1e155d8/artifacts
+end_time: 1764237274843
+entry_point_name: ''
+experiment_id: '656370339648100683'
+lifecycle_stage: active
+run_id: b78aefd455b34851a7d4f70bf1e155d8
+run_name: decision_tree_run
+run_uuid: b78aefd455b34851a7d4f70bf1e155d8
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764237263243
+status: 3
+tags: []
+user_id: nawaz

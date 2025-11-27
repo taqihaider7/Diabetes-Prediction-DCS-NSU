@@ -1,0 +1,15 @@
+artifact_uri: file:///H:/NSU/DCS/Diabetes-Prediction-DCS-NSU/mlruns/656370339648100683/03b3141492814764ba1f867f51fe4826/artifacts
+end_time: 1764219191963
+entry_point_name: ''
+experiment_id: '656370339648100683'
+lifecycle_stage: active
+run_id: 03b3141492814764ba1f867f51fe4826
+run_name: gaudy-dove-218
+run_uuid: 03b3141492814764ba1f867f51fe4826
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764219175118
+status: 3
+tags: []
+user_id: nawaz

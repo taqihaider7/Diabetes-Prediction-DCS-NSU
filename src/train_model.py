@@ -1,483 +1,328 @@
-# import pandas as pd
-# import numpy as np
-# from sklearn.model_selection import train_test_split
-# from sklearn.ensemble import RandomForestClassifier
-# from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-# from sklearn.preprocessing import StandardScaler
-# import joblib
-# import mlflow
-# import mlflow.sklearn
-# import os
-# from pathlib import Path
-# import sklearn
 
-# class DiabetesModelTrainer:
-#     def __init__(self):
-#         self.model = None
-#         self.scaler = StandardScaler()
-#         self.best_score = 0
-        
-#         # Configuration
-#         self.MLFLOW_TRACKING_URI = "mlruns"
-#         self.MLFLOW_EXPERIMENT_NAME = "diabetes_prediction"
-#         self.MODEL_DIR = "../models"
-#         self.BEST_MODEL_NAME = "best_diabetes_model.pkl"
-#         self.DATA_PATH = "data/diabetes.csv"
-#         self.TEST_SIZE = 0.2
-#         self.RANDOM_STATE = 42
-        
-#         # Create directories if they don't exist
-#         os.makedirs(self.MODEL_DIR, exist_ok=True)
-#         os.makedirs(self.MLFLOW_TRACKING_URI, exist_ok=True)
-    
-#     def load_data(self):
-#         """Load and preprocess the diabetes dataset"""
-#         df = pd.read_csv(self.DATA_PATH)
-        
-#         # Handle missing values (zeros that should be NaN)
-#         columns_to_clean = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
-#         for col in columns_to_clean:
-#             df[col] = df[col].replace(0, np.nan)
-#             df[col] = df[col].fillna(df[col].median())
-        
-#         return df
-    
-#     def prepare_features(self, df):
-#         """Prepare features and target"""
-#         X = df.drop('Outcome', axis=1)
-#         y = df['Outcome']
-        
-#         return X, y
-    
-#     def train_model(self):
-#         """Train the model with MLflow tracking"""
-#         # Set up MLflow
-#         mlflow.set_tracking_uri(self.MLFLOW_TRACKING_URI)
-#         mlflow.set_experiment(self.MLFLOW_EXPERIMENT_NAME)
-        
-#         # Load and prepare data
-#         df = self.load_data()
-#         X, y = self.prepare_features(df)
-        
-#         # Split data
-#         X_train, X_test, y_train, y_test = train_test_split(
-#             X, y, test_size=self.TEST_SIZE, random_state=self.RANDOM_STATE, stratify=y
-#         )
-        
-#         # Scale features
-#         X_train_scaled = self.scaler.fit_transform(X_train)
-#         X_test_scaled = self.scaler.transform(X_test)
-        
-#         with mlflow.start_run():
-#             # Train model
-#             self.model = RandomForestClassifier(
-#                 n_estimators=100,
-#                 max_depth=10,
-#                 random_state=self.RANDOM_STATE
-#             )
-            
-#             self.model.fit(X_train_scaled, y_train)
-            
-#             # Make predictions
-#             y_pred = self.model.predict(X_test_scaled)
-#             y_pred_proba = self.model.predict_proba(X_test_scaled)
-            
-#             # Calculate metrics
-#             accuracy = accuracy_score(y_test, y_pred)
-#             cm = confusion_matrix(y_test, y_pred)
-#             cr = classification_report(y_test, y_pred, output_dict=True)
-            
-#             # Log parameters
-#             mlflow.log_param("n_estimators", 100)
-#             mlflow.log_param("max_depth", 10)
-#             mlflow.log_param("test_size", self.TEST_SIZE)
-#             mlflow.log_param("random_state", self.RANDOM_STATE)
-            
-#             # Log metrics
-#             mlflow.log_metric("accuracy", accuracy)
-#             mlflow.log_metric("precision", cr['1']['precision'])
-#             mlflow.log_metric("recall", cr['1']['recall'])
-#             mlflow.log_metric("f1_score", cr['1']['f1-score'])
-            
-#             # Log model
-#             mlflow.sklearn.log_model(self.model, "random_forest_model")
-            
-#             # Log artifacts
-#             mlflow.log_artifact(self.DATA_PATH)
-            
-#             print(f"Model trained with accuracy: {accuracy:.4f}")
-#             print(f"Precision: {cr['1']['precision']:.4f}")
-#             print(f"Recall: {cr['1']['recall']:.4f}")
-#             print(f"F1-Score: {cr['1']['f1-score']:.4f}")
-            
-#             # Save best model locally
-#             if accuracy > self.best_score:
-#                 self.best_score = accuracy
-#                 self.save_model()
-                
-#             return accuracy
-
-# def save_model(self):
-#     """Save the best model locally"""
-#     model_path = f"{self.MODEL_DIR}/{self.BEST_MODEL_NAME}"
-    
-#     # Create a more robust model dictionary
-#     model_dict = {
-#         'model': self.model,
-#         'scaler': self.scaler,
-#         'metadata': {
-#             'accuracy': self.best_score,
-#             'model_type': 'RandomForest',
-#             'features': ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 
-#                        'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age'],
-#             'sklearn_version': sklearn.__version__,
-#             'numpy_version': np.__version__,
-#             'pandas_version': pd.__version__
-#         }
-#     }
-    
-#     joblib.dump(model_dict, model_path)
-#     print(f"✅ Best model saved to {model_path}")
-
-#     # def save_model(self):
-    
-#     #     """Save the best model locally"""
-#     #     model_path = f"{self.MODEL_DIR}/{self.BEST_MODEL_NAME}"
-#     #     joblib.dump({
-#     #         'model': self.model,
-#     #         'scaler': self.scaler,
-#     #         'metadata': {
-#     #             'accuracy': self.best_score,
-#     #             'model_type': 'RandomForest',
-#     #             'features': ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 
-#     #                        'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age']
-#     #         }
-#     #     }, model_path)
-        
-#     #     print(f"Best model saved to {model_path}")
-
-# def register_model_dagshub():
-#     """Register the best model for DAGsHub (manual integration)"""
-#     mlflow.set_tracking_uri("mlruns")
-#     experiment_name = "diabetes_prediction"
-    
-#     try:
-#         # Search for the best run
-#         experiment = mlflow.get_experiment_by_name(experiment_name)
-#         if experiment is None:
-#             print("No experiment found")
-#             return
-        
-#         runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
-#         if runs.empty:
-#             print("No runs found in experiment")
-#             return
-            
-#         best_run = runs.loc[runs['metrics.accuracy'].idxmax()]
-        
-#         print(f"Best run ID: {best_run.run_id}")
-#         print(f"Best accuracy: {best_run['metrics.accuracy']:.4f}")
-        
-#         # Model URI for registration
-#         model_uri = f"runs:/{best_run.run_id}/random_forest_model"
-        
-#         print("=" * 50)
-#         print("DAGsHub Registration Instructions:")
-#         print("1. Set up your DAGsHub repository")
-#         print("2. Configure MLflow tracking URI:")
-#         print("   mlflow.set_tracking_uri('https://dagshub.com/<username>/<repository>.mlflow')")
-#         print("3. Use this model URI to register:")
-#         print(f"   Model URI: {model_uri}")
-#         print("4. Run: mlflow.register_model(model_uri, 'diabetes-prediction-model')")
-#         print("=" * 50)
-        
-#     except Exception as e:
-#         print(f"Error in model registration: {e}")
-
-# if __name__ == "__main__":
-#     # Train the model
-#     trainer = DiabetesModelTrainer()
-#     accuracy = trainer.train_model()
-    
-#     # Show registration instructions
-#     if accuracy > 0.7:  # Only register if model is decent
-#         register_model_dagshub()
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
 import joblib
-import mlflow
-import mlflow.sklearn
+import warnings
 import os
-from pathlib import Path
-import sklearn
+import datetime
+
+warnings.filterwarnings('ignore')
 
 class DiabetesModelTrainer:
-    def __init__(self):
-        self.model = None
+    def __init__(self, experiment_name="Diabetes-Experiments"):
+        self.experiment_name = experiment_name
+        self.models = {
+            "random_forest": RandomForestClassifier(random_state=42),
+            "gradient_boosting": GradientBoostingClassifier(random_state=42),
+            "decision_tree": DecisionTreeClassifier(random_state=42)
+        }
         self.scaler = StandardScaler()
-        self.best_score = 0
-            # Add these DAGsHub configurations:
-        self.DAGSHUB_USERNAME = "taqihaider7"
-        self.DAGSHUB_REPOSITORY = "Diabetes-Prediction-DCS-NSU"
-        self.DAGSHUB_TRACKING_URI = f"https://dagshub.com/{self.DAGSHUB_USERNAME}/{self.DAGSHUB_REPOSITORY}.mlflow"
-        # Configuration - Use relative paths to avoid Windows path issues
-        self.MLFLOW_TRACKING_URI = "mlruns"  # Relative path
-        self.MLFLOW_EXPERIMENT_NAME = "diabetes_prediction"
-        self.MODEL_DIR = "models"
-        self.BEST_MODEL_NAME = "best_diabetes_model.pkl"
-        self.DATA_PATH = "data/diabetes.csv"  # Relative path
-        self.TEST_SIZE = 0.2
-        self.RANDOM_STATE = 42
         
-        # Create directories if they don't exist
-        os.makedirs(self.MODEL_DIR, exist_ok=True)
-        os.makedirs(self.MLFLOW_TRACKING_URI, exist_ok=True)
+        # Setup MLflow tracking
+        self.setup_mlflow_tracking()
+    
+    def setup_mlflow_tracking(self):
+        """Setup MLflow tracking with DAGsHub"""
+        # DAGsHub configuration
+        DAGSHUB_USERNAME = "nawazishpatana"
+        DAGSHUB_TOKEN = "a3e0c3abf610a86cea1f349c92b841da5816eac3"
+        DAGSHUB_TRACKING_URI = "https://dagshub.com/taqihaider7/Diabetes-Prediction-DCS-NSU.mlflow"
+        
+        # Set environment variables for DAGsHub
+        os.environ['MLFLOW_TRACKING_USERNAME'] = DAGSHUB_USERNAME
+        os.environ['MLFLOW_TRACKING_PASSWORD'] = DAGSHUB_TOKEN
+        
+        # Set tracking URI
+        mlflow.set_tracking_uri(DAGSHUB_TRACKING_URI)
+        
+        print(f"🔧 MLflow Tracking URI: {mlflow.get_tracking_uri()}")
+        print(f"🎯 Experiment: {self.experiment_name}")
     
     def load_data(self):
-        """Load and preprocess the diabetes dataset"""
-        print(f"Loading data from: {self.DATA_PATH}")
-        df = pd.read_csv(self.DATA_PATH)
+        """
+        Load diabetes dataset from CSV file
+        """
+        try:
+            df = pd.read_csv('data/diabetes.csv')
+            print(f"✅ Dataset loaded: {df.shape[0]} samples, {df.shape[1]} features")
+            print(f"📊 Diabetes prevalence: {df['Outcome'].mean():.2%}")
+            
+            # Display basic info about the dataset
+            print(f"📋 Features: {list(df.columns)}")
+            print(f"🔍 First few rows:")
+            print(df.head())
+            
+            return df
+        except FileNotFoundError:
+            print("❌ diabetes.csv not found. Creating synthetic data...")
+            return self.create_synthetic_data()
+        except Exception as e:
+            print(f"❌ Error loading data: {e}")
+            return self.create_synthetic_data()
+    
+    def create_synthetic_data(self):
+        """
+        Create synthetic diabetes classification dataset as fallback
+        """
+        np.random.seed(42)
+        n_samples = 1000
         
-        # Handle missing values (zeros that should be NaN)
-        columns_to_clean = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
-        for col in columns_to_clean:
-            df[col] = df[col].replace(0, np.nan)
-            df[col] = df[col].fillna(df[col].median())
+        data = {
+            'Pregnancies': np.random.poisson(2, n_samples),
+            'Glucose': np.random.normal(120, 30, n_samples),
+            'BloodPressure': np.random.normal(80, 12, n_samples),
+            'SkinThickness': np.random.normal(25, 8, n_samples),
+            'Insulin': np.random.normal(100, 50, n_samples),
+            'BMI': np.random.normal(28, 6, n_samples),
+            'DiabetesPedigreeFunction': np.random.normal(0.5, 0.2, n_samples),
+            'Age': np.random.normal(50, 15, n_samples)
+        }
         
-        print(f"Dataset loaded with {len(df)} rows and {len(df.columns)} columns")
+        df = pd.DataFrame(data)
+        
+        # Create target variable based on features
+        diabetes_risk = (
+            0.1 * (df['Age'] - 50) / 15 +
+            0.3 * (df['Glucose'] - 120) / 30 +
+            0.2 * (df['BMI'] - 28) / 6 +
+            0.1 * (df['BloodPressure'] - 80) / 12 +
+            0.2 * (df['DiabetesPedigreeFunction'] - 0.5) / 0.2 +
+            0.1 * np.random.normal(0, 1, n_samples)
+        )
+        
+        df['Outcome'] = (diabetes_risk > 0.5).astype(int)
+        
+        print(f"📋 Synthetic dataset created: {df.shape[0]} samples")
         return df
     
-    def prepare_features(self, df):
-        """Prepare features and target"""
+    def preprocess_data(self, df):
+        """
+        Preprocess the data for training
+        """
         X = df.drop('Outcome', axis=1)
         y = df['Outcome']
         
-        return X, y
-    
-    def train_model(self, use_dagshub=False):
-        """Train the model with MLflow tracking"""
-        if use_dagshub:
-           self.setup_dagshub_tracking()
-        else:
-          mlflow.set_tracking_uri(self.MLFLOW_TRACKING_URI)
-    
-    # Rest of your existing train_model code...
-        mlflow.set_experiment(self.MLFLOW_EXPERIMENT_NAME)
-
-        # Set up MLflow
-        mlflow.set_tracking_uri(self.MLFLOW_TRACKING_URI)
-        mlflow.set_experiment(self.MLFLOW_EXPERIMENT_NAME)
-        
-        # Load and prepare data
-        df = self.load_data()
-        X, y = self.prepare_features(df)
-        
-        # Split data
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=self.TEST_SIZE, random_state=self.RANDOM_STATE, stratify=y
+            X, y, test_size=0.2, random_state=42, stratify=y
         )
         
-        # Scale features
         X_train_scaled = self.scaler.fit_transform(X_train)
         X_test_scaled = self.scaler.transform(X_test)
         
-        with mlflow.start_run():
-            # Train model
-            self.model = RandomForestClassifier(
-                n_estimators=100,
-                max_depth=10,
-                random_state=self.RANDOM_STATE
-            )
-            
-            self.model.fit(X_train_scaled, y_train)
-            
-            # Make predictions
-            y_pred = self.model.predict(X_test_scaled)
-            y_pred_proba = self.model.predict_proba(X_test_scaled)
-            
-            # Calculate metrics
-            accuracy = accuracy_score(y_test, y_pred)
-            cm = confusion_matrix(y_test, y_pred)
-            cr = classification_report(y_test, y_pred, output_dict=True)
-            
-            # Log parameters
-            mlflow.log_param("n_estimators", 100)
-            mlflow.log_param("max_depth", 10)
-            mlflow.log_param("test_size", self.TEST_SIZE)
-            mlflow.log_param("random_state", self.RANDOM_STATE)
-            
-            # Log metrics
-            mlflow.log_metric("accuracy", accuracy)
-            mlflow.log_metric("precision", cr['1']['precision'])
-            mlflow.log_metric("recall", cr['1']['recall'])
-            mlflow.log_metric("f1_score", cr['1']['f1-score'])
-            
-            # Log model
-            mlflow.sklearn.log_model(self.model, "random_forest_model")
-            
-            # Log artifacts
-            mlflow.log_artifact(self.DATA_PATH)
-            
-            print(f"Model trained with accuracy: {accuracy:.4f}")
-            print(f"Precision: {cr['1']['precision']:.4f}")
-            print(f"Recall: {cr['1']['recall']:.4f}")
-            print(f"F1-Score: {cr['1']['f1-score']:.4f}")
-            
-            # Save best model locally
-            if accuracy > self.best_score:
-                self.best_score = accuracy
-                self.save_model()
-                
-            return accuracy
+        return X_train_scaled, X_test_scaled, y_train, y_test, X.columns
     
-    def save_model(self):
-        """Save the best model locally"""
-        model_path = f"{self.MODEL_DIR}/{self.BEST_MODEL_NAME}"
+    def calculate_metrics(self, y_true, y_pred, y_pred_proba=None):
+        """
+        Calculate evaluation metrics
+        """
+        metrics = {
+            'accuracy': accuracy_score(y_true, y_pred),
+            'precision': precision_score(y_true, y_pred, zero_division=0),
+            'recall': recall_score(y_true, y_pred, zero_division=0),
+            'f1_score': f1_score(y_true, y_pred, zero_division=0),
+        }
         
-        # Create a more robust model dictionary
-        model_dict = {
-            'model': self.model,
-            'scaler': self.scaler,
+        if y_pred_proba is not None:
+            try:
+                metrics['roc_auc'] = roc_auc_score(y_true, y_pred_proba)
+            except:
+                metrics['roc_auc'] = 0.0
+        
+        return metrics
+    
+    def train_models(self):
+        """
+        Train multiple models and log to MLflow (DAGsHub compatible version)
+        """
+        # Set experiment
+        mlflow.set_experiment(self.experiment_name)
+        
+        # Load and preprocess data
+        print("📥 Loading and preprocessing data...")
+        df = self.load_data()
+        X_train, X_test, y_train, y_test, feature_names = self.preprocess_data(df)
+        
+        best_score = 0
+        best_model = None
+        best_model_name = None
+        
+        # Train each model and log to MLflow
+        for model_name, model in self.models.items():
+            print(f"\n🏋️ Training {model_name}...")
+            
+            # Create unique run name with timestamp
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            run_name = f"{model_name}_{timestamp}"
+            
+            with mlflow.start_run(run_name=run_name):
+                print(f"  🚀 Starting MLflow run: {run_name}")
+                
+                # Train model
+                model.fit(X_train, y_train)
+                
+                # Make predictions
+                y_pred = model.predict(X_test)
+                y_pred_proba = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else None
+                
+                # Calculate metrics
+                metrics = self.calculate_metrics(y_test, y_pred, y_pred_proba)
+                
+                # Log parameters
+                mlflow.log_params({
+                    "model_type": model_name,
+                    "random_state": 42,
+                    "n_features": X_train.shape[1],
+                    "n_samples": len(X_train),
+                    "test_size": 0.2,
+                    "features": ", ".join(feature_names)
+                })
+                
+                # Log metrics
+                for metric_name, metric_value in metrics.items():
+                    mlflow.log_metric(metric_name, metric_value)
+                    print(f"  📈 {metric_name}: {metric_value:.4f}")
+                
+                # ✅ FIX: Use DAGsHub compatible model logging (without registered_model_name)
+                try:
+                    # Log model without registration (DAGsHub doesn't support model registry)
+                    mlflow.sklearn.log_model(
+                        sk_model=model,
+                        artifact_path=f"model_{model_name}",
+                        # Remove registered_model_name parameter for DAGsHub compatibility
+                    )
+                    print(f"  ✅ Model logged to MLflow")
+                except Exception as e:
+                    print(f"  ⚠️  Could not log model to MLflow: {e}")
+                    print(f"  💾 Saving model locally only")
+                
+                # Log feature importance if available
+                if hasattr(model, "feature_importances_"):
+                    try:
+                        importance_dict = dict(zip(feature_names, model.feature_importances_))
+                        for feature, importance in importance_dict.items():
+                            mlflow.log_metric(f"feature_importance_{feature}", importance)
+                        print(f"  📊 Feature importance logged")
+                    except Exception as e:
+                        print(f"  ⚠️  Could not log feature importance: {e}")
+                
+                # Log dataset info
+                try:
+                    dataset_info = {
+                        "train_samples": len(X_train),
+                        "test_samples": len(X_test),
+                        "positive_class_ratio": y_train.mean(),
+                        "feature_names": list(feature_names)
+                    }
+                    mlflow.log_dict(dataset_info, "dataset_info.json")
+                except Exception as e:
+                    print(f"  ⚠️  Could not log dataset info: {e}")
+                
+                # Track best model
+                current_score = metrics['f1_score']
+                if current_score > best_score:
+                    best_score = current_score
+                    best_model = model
+                    best_model_name = model_name
+                    
+                print(f"  ✅ {model_name} training completed")
+        
+        # Save best model locally
+        if best_model is not None:
+            self.save_best_model(best_model, best_model_name, best_score, self.scaler, feature_names)
+        
+        return best_model, best_model_name, best_score
+    
+    def save_best_model(self, model, model_name, score, scaler, feature_names):
+        """
+        Save the best model and scaler locally
+        """
+        # Create models directory if it doesn't exist
+        os.makedirs("models", exist_ok=True)
+        
+        # Save model and scaler together
+        model_data = {
+            'model': model,
+            'scaler': scaler,
             'metadata': {
-                'accuracy': self.best_score,
-                'model_type': 'RandomForest',
-                'features': ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 
-                           'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age'],
-                'sklearn_version': sklearn.__version__,
-                'numpy_version': np.__version__,
-                'pandas_version': pd.__version__
+                'model_name': model_name,
+                'f1_score': score,
+                'feature_names': list(feature_names),
+                'timestamp': datetime.datetime.now().isoformat(),
+                'saved_locally': True
             }
         }
         
-        joblib.dump(model_dict, model_path)
-        print(f"✅ Best model saved to {model_path}")
-def setup_dagshub_tracking(self):
-    """Setup MLflow to use DAGsHub as tracking server"""
-    mlflow.set_tracking_uri(self.DAGSHUB_TRACKING_URI)
-    print(f"🔗 MLflow tracking set to DAGsHub: {self.DAGSHUB_TRACKING_URI}")
+        model_path = "models/best_diabetes_model.pkl"
+        joblib.dump(model_data, model_path)
+        
+        # Also save scaler separately for convenience
+        scaler_path = "models/scaler.pkl"
+        joblib.dump(scaler, scaler_path)
+        
+        print(f"\n💾 Best model saved locally:")
+        print(f"   Model: {model_path}")
+        print(f"   Scaler: {scaler_path}")
+        print(f"   Type: {model_name}")
+        print(f"   F1-Score: {score:.4f}")
+        print(f"   Features: {', '.join(feature_names)}")
+    
+    def verify_mlflow_setup(self):
+        """Verify MLflow is setup correctly"""
+        print("\n🔍 Verifying MLflow Setup:")
+        print(f"   Tracking URI: {mlflow.get_tracking_uri()}")
+        print(f"   Experiment: {self.experiment_name}")
+        
+        try:
+            # Try to get experiment
+            experiment = mlflow.get_experiment_by_name(self.experiment_name)
+            if experiment:
+                print(f"   ✅ Experiment found: {experiment.experiment_id}")
+            else:
+                print("   ℹ️  Experiment will be created on first run")
+        except Exception as e:
+            print(f"   ⚠️  Note: {e}")
 
-def register_model_dagshub():
-    """Register the best model for DAGsHub (manual integration)"""
-    mlflow.set_tracking_uri("mlruns")
-    experiment_name = "diabetes_prediction"
+def main():
+    """
+    Main function to run the training pipeline
+    """
+    # Initialize trainer
+    trainer = DiabetesModelTrainer(experiment_name="Nawaz-Experiments")
+    
+    print("🚀 Starting Diabetes Prediction Model Training")
+    print("=" * 50)
+    
+    # Verify MLflow setup first
+    trainer.verify_mlflow_setup()
     
     try:
-        # Search for the best run
-        experiment = mlflow.get_experiment_by_name(experiment_name)
-        if experiment is None:
-            print("No experiment found")
-            return
+        # Train models and log to MLflow
+        print("\n1. Training models with MLflow logging...")
+        best_model, best_model_name, best_score = trainer.train_models()
         
-        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
-        if runs.empty:
-            print("No runs found in experiment")
-            return
-            
-        best_run = runs.loc[runs['metrics.accuracy'].idxmax()]
+        print(f"\n🎉 Training completed!")
+        print(f"   Best model: {best_model_name}")
+        print(f"   Best F1-Score: {best_score:.4f}")
         
-        print(f"Best run ID: {best_run.run_id}")
-        print(f"Best accuracy: {best_run['metrics.accuracy']:.4f}")
+        print(f"\n📊 View your experiments at:")
+        print(f"   https://dagshub.com/taqihaider7/Diabetes-Prediction-DCS-NSU.mlflow")
         
-        # Model URI for registration
-        model_uri = f"runs:/{best_run.run_id}/random_forest_model"
-        
-        print("=" * 50)
-        print("DAGsHub Registration Instructions:")
-        print("1. Set up your DAGsHub repository")
-        print("2. Configure MLflow tracking URI:")
-        print("   mlflow.set_tracking_uri('https://dagshub.com/<username>/<repository>.mlflow')")
-        print("3. Use this model URI to register:")
-        print(f"   Model URI: {model_uri}")
-        print("4. Run: mlflow.register_model(model_uri, 'diabetes-prediction-model')")
-        print("=" * 50)
+        print(f"\n🔮 Next steps:")
+        print(f"   1. Run: python src/app.py")
+        print(f"   2. Visit: http://localhost:8000/docs")
+        print(f"   3. Test your API endpoints!")
         
     except Exception as e:
-        print(f"Error in model registration: {e}")
-def register_model_dagshub():
-    """Register the best model for DAGsHub (manual integration)"""
-    mlflow.set_tracking_uri("mlruns")
-    experiment_name = "diabetes_prediction"
-    
-    try:
-        # Search for the best run
-        experiment = mlflow.get_experiment_by_name(experiment_name)
-        if experiment is None:
-            print("No experiment found")
-            return
-        
-        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
-        if runs.empty:
-            print("No runs found in experiment")
-            return
-            
-        best_run = runs.loc[runs['metrics.accuracy'].idxmax()]
-        
-        print(f"Best run ID: {best_run.run_id}")
-        print(f"Best accuracy: {best_run['metrics.accuracy']:.4f}")
-        
-        # Model URI for registration
-        model_uri = f"runs:/{best_run.run_id}/random_forest_model"
-        
-        print("=" * 50)
-        print("DAGsHub Registration Instructions:")
-        print("1. Set up your DAGsHub repository")
-        print("2. Configure MLflow tracking URI:")
-        print("   mlflow.set_tracking_uri('https://dagshub.com/<username>/<repository>.mlflow')")
-        print("3. Use this model URI to register:")
-        print(f"   Model URI: {model_uri}")
-        print("4. Run: mlflow.register_model(model_uri, 'diabetes-prediction-model')")
-        print("=" * 50)
-        
-    except Exception as e:
-        print(f"Error in model registration: {e}")
+        print(f"\n❌ Training failed: {e}")
+        print(f"💡 Try running with local MLflow tracking:")
+        print(f"   mlflow.set_tracking_uri('file:///./mlruns')")
 
-def register_model_dagshub(self):
-    """Register the best model for DAGsHub (manual integration)"""
-    mlflow.set_tracking_uri("mlruns")
-    experiment_name = "diabetes_prediction"
-    
-    try:
-        # Search for the best run
-        experiment = mlflow.get_experiment_by_name(experiment_name)
-        if experiment is None:
-            print("No experiment found")
-            return
-        
-        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
-        if runs.empty:
-            print("No runs found in experiment")
-            return
-            
-        best_run = runs.loc[runs['metrics.accuracy'].idxmax()]
-        
-        print(f"Best run ID: {best_run.run_id}")
-        print(f"Best accuracy: {best_run['metrics.accuracy']:.4f}")
-        
-        # Model URI for registration
-        model_uri = f"runs:/{best_run.run_id}/random_forest_model"
-        
-        print("=" * 50)
-        print("DAGsHub Registration Instructions:")
-        print("1. Set up your DAGsHub repository")
-        print("2. Configure MLflow tracking URI:")
-        print("   mlflow.set_tracking_uri('https://dagshub.com/<username>/<repository>.mlflow')")
-        print("3. Use this model URI to register:")
-        print(f"   Model URI: {model_uri}")
-        print("4. Run: mlflow.register_model(model_uri, 'diabetes-prediction-model')")
-        print("=" * 50)
-        
-    except Exception as e:
-        print(f"Error in model registration: {e}")
 if __name__ == "__main__":
-    # Train the model
-    trainer = DiabetesModelTrainer()
-    accuracy = trainer.train_model()
-    
-    # Show registration instructions
-    if accuracy > 0.7:
-        print("✅ Model trained successfully!")
-        print("💡 For DAGsHub registration, set up your MLflow tracking URI to DAGsHub")
+    main()
