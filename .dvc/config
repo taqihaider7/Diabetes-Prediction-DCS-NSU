@@ -5,6 +5,7 @@
 ['remote "localremote"']
     url = ../dvc-storage
 ['remote "dagshub"']
-    url = s3://taqihaider7/Diabetes-Prediction-DCS-NSU
-    access_key_id = tahanoor78655
-    secret_access_key = 53dfbba532a140056bf61501adaa2da2e1659338
+    url = https://dagshub.com/taqihaider7/Diabetes-Prediction-DCS-NSU.dvc
+    auth = basic
+    user = taqihaider7
+    password = 53dfbba532a140056bf61501adaa2da
