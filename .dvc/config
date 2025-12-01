@@ -1,4 +1,6 @@
 [core]
-    remote = origin
+    remote = localremote
 ['remote "origin"']
     url = https://dagshub.com/taqihaider7/Diabetes-Prediction-DCS-NSU.dvc
+['remote "localremote"']
+    url = ../dvc-storage
