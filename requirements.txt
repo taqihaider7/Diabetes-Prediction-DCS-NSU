@@ -1,0 +1,9 @@
+mlflow
+dvc
+pandas
+numpy
+scikit-learn
+joblib
+fastapi
+uvicorn[standard]
+python-dotenv
