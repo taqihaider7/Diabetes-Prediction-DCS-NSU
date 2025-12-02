@@ -30,6 +30,7 @@ from typing import Dict, Any, Tuple, List, Optional
 # Import monitoring modules
 from monitoring import setup_loki_logging, get_logger, MetricsCollector, MonitoringDashboard
 from monitoring.config import DEFAULT_CONFIG
+from monitoring.shared_metrics import get_shared_store
 
 # Configure page
 st.set_page_config(
@@ -422,6 +423,11 @@ with st.sidebar:
     st.caption(f"Total Predictions: {summary['total_predictions']}")
     st.caption(f"Success Rate: {summary['success_rate_percent']:.1f}%")
     st.caption(f"Avg Latency: {summary['latency']['mean_ms']:.1f} ms")
+    
+    # Verify shared storage
+    shared_store = get_shared_store()
+    shared_summary = shared_store.get_summary()
+    st.caption(f"📁 Shared Store: {shared_summary['total_predictions']} predictions")
     
     # Link to monitoring app
     st.markdown("**[📊 Open Monitoring Dashboard →](http://localhost:8502)**")

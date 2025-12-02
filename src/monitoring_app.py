@@ -86,6 +86,10 @@ with st.sidebar:
     shared_store = get_shared_store()
     summary = shared_store.get_summary()
     
+    # Debug info
+    metrics_file_path = str(shared_store.metrics_file)
+    st.caption(f"📁 Metrics file: ...{metrics_file_path[-40:]}")
+    
     st.metric("Total Predictions", f"{summary['total_predictions']:,}")
     st.metric("Success Rate", f"{summary['success_rate_percent']:.1f}%")
     st.metric("Avg Latency", f"{summary['latency']['mean_ms']:.1f} ms")
@@ -96,7 +100,8 @@ with st.sidebar:
     st.markdown("### 🔄 Refresh")
     auto_refresh = st.checkbox("Auto-refresh (30s)", value=False)
     
-    if st.button("🔄 Refresh Now", width='stretch'):
+    if st.button("🔄 Refresh Now", use_container_width=True):
+        st.cache_resource.clear()
         st.rerun()
     
     if auto_refresh:
@@ -108,7 +113,7 @@ with st.sidebar:
     
     # Export options
     st.markdown("### 💾 Export")
-    if st.button("Export Metrics", width='stretch'):
+    if st.button("Export Metrics", use_container_width=True):
         filepath = metrics_collector.export_metrics()
         st.success(f"✓ Exported to: {os.path.basename(filepath)}")
         
@@ -118,11 +123,11 @@ with st.sidebar:
                 data=f.read(),
                 file_name=f"metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
-                width=True
+                use_container_width=True
             )
     
     # Reset metrics
-    if st.button("🗑️ Reset Metrics", width='stretch'):
+    if st.button("🗑️ Reset Metrics", use_container_width=True):
         metrics_collector.reset_metrics()
         st.success("✓ Metrics reset")
         st.rerun()
@@ -198,7 +203,7 @@ if page == "📊 Overview":
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2)
             )
-            st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("📊 No predictions yet. Start making predictions to see distribution.")
     
@@ -230,7 +235,7 @@ if page == "📊 Overview":
         )
         fig.update_traces(texttemplate='%{text:.1f}', textposition='outside')
         fig.update_layout(height=350, showlegend=True)
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, use_container_width=True)
     
     st.divider()
     
@@ -262,7 +267,7 @@ if page == "📊 Overview":
             height=400,
             hovermode='x unified'
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("📊 No predictions yet. Start making predictions to see timeline.")
 
@@ -313,7 +318,7 @@ elif page == "🎯 Inference Metrics":
                 height=350,
                 showlegend=False
             )
-            st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, use_container_width=True)
         
         with col2:
             st.markdown("### 📈 Distribution Percentage")
@@ -327,7 +332,7 @@ elif page == "🎯 Inference Metrics":
                     hole=0.4
                 )])
                 fig.update_layout(height=350)
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("📊 No predictions yet.")
 
@@ -377,7 +382,7 @@ elif page == "⚠️ Error Analysis":
                     }
                 ))
                 fig.update_layout(height=300)
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
         
         with col2:
             # Error types pie chart
@@ -394,7 +399,7 @@ elif page == "⚠️ Error Analysis":
                     textinfo='label+percent'
                 )])
                 fig.update_layout(height=300, showlegend=False)
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
 
 # ==================== PAGE: Performance ====================
 elif page == "🚀 Performance":
@@ -438,7 +443,7 @@ elif page == "🚀 Performance":
             height=350,
             showlegend=False
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         # Latency distribution
@@ -458,7 +463,7 @@ elif page == "🚀 Performance":
                 height=350,
                 showlegend=False
             )
-            st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("No latency data available yet")
 
@@ -476,7 +481,7 @@ elif page == "📝 Recent Activity":
         filter_type = st.selectbox("Filter by", ["All", "Successful", "Failed"])
     
     with col3:
-        if st.button("🔄 Refresh", width='stretch'):
+        if st.button("🔄 Refresh", use_container_width=True):
             st.rerun()
     
     # Get predictions from shared storage
@@ -511,7 +516,7 @@ elif page == "📝 Recent Activity":
         
         st.dataframe(
             df_display,
-            width=True,
+            use_container_width=True,
             hide_index=True,
             height=600
         )
@@ -566,7 +571,7 @@ elif page == "📈 Analytics":
             )
             fig.update_traces(line_color='#667eea', line_width=2)
             fig.update_layout(height=350)
-            st.plotly_chart(fig, width=True)
+            st.plotly_chart(fig, use_container_width=True)
         
         with col2:
             # Success rate over time
@@ -583,7 +588,7 @@ elif page == "📈 Analytics":
             fig.update_traces(line_color='#51cf66', line_width=2)
             fig.update_yaxis(range=[0, 100])
             fig.update_layout(height=350)
-            st.plotly_chart(fig, width=True)
+            st.plotly_chart(fig, use_container_width=True)
         
         st.divider()
         
@@ -609,7 +614,7 @@ elif page == "📈 Analytics":
                     height=300,
                     showlegend=False
                 )
-                st.plotly_chart(fig, width=True)
+                st.plotly_chart(fig, use_container_width=True)
         
         with col2:
             # Confidence distribution
@@ -627,7 +632,7 @@ elif page == "📈 Analytics":
                     height=300,
                     showlegend=False
                 )
-                st.plotly_chart(fig, width=True)
+                st.plotly_chart(fig, use_container_width=True)
         
         with col3:
             # Latency box plot
@@ -649,7 +654,7 @@ elif page == "📈 Analytics":
                 height=300,
                 showlegend=True
             )
-            st.plotly_chart(fig, width=True)
+            st.plotly_chart(fig, use_container_width=True)
         
         st.divider()
         
@@ -670,7 +675,7 @@ elif page == "📈 Analytics":
                 title='Correlation Matrix (Successful Predictions)'
             )
             fig.update_layout(height=400)
-            st.plotly_chart(fig, width=True)
+            st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("📊 Not enough data for analytics. Make more predictions to see insights.")
 
@@ -678,6 +683,53 @@ elif page == "📈 Analytics":
 elif page == "⚙️ Configuration":
     st.divider()
     st.markdown("## ⚙️ Configuration")
+    
+    # Debug information
+    st.markdown("### 🐛 Debug Information")
+    shared_store = get_shared_store()
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Metrics File Location:**")
+        st.code(str(shared_store.metrics_file))
+        
+        # Check if file exists
+        if shared_store.metrics_file.exists():
+            st.success("✅ Metrics file exists")
+            file_size = shared_store.metrics_file.stat().st_size
+            st.caption(f"File size: {file_size} bytes")
+            
+            # Show raw file content
+            if st.button("👁️ View Raw File Content"):
+                try:
+                    with open(shared_store.metrics_file, 'r') as f:
+                        content = f.read()
+                        st.code(content[:1000] + "..." if len(content) > 1000 else content, language='json')
+                except Exception as e:
+                    st.error(f"Error reading file: {e}")
+        else:
+            st.warning("⚠️ Metrics file does not exist yet")
+            if st.button("🔧 Initialize Metrics File"):
+                shared_store._write_metrics({
+                    'predictions': [],
+                    'errors': [],
+                    'last_updated': datetime.now().isoformat()
+                })
+                st.success("✅ Metrics file initialized")
+                st.rerun()
+    
+    with col2:
+        st.markdown("**Current Metrics Summary:**")
+        summary = shared_store.get_summary()
+        st.json({
+            'total_predictions': summary['total_predictions'],
+            'successful': summary['successful_predictions'],
+            'failed': summary['failed_predictions'],
+            'last_updated': summary.get('last_updated', 'N/A')
+        })
+    
+    st.divider()
     
     # Current configuration
     st.markdown("### 📋 Current Settings")
@@ -703,7 +755,7 @@ elif page == "⚙️ Configuration":
         ]
     }
     
-    st.dataframe(pd.DataFrame(config_data), width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(config_data), use_container_width=True, hide_index=True)
     
     st.divider()
     
@@ -736,7 +788,7 @@ elif page == "⚙️ Configuration":
     """)
     
     # Test connection button
-    if st.button("🔌 Test Grafana Cloud Connection", width='stretch'):
+    if st.button("🔌 Test Grafana Cloud Connection", use_container_width=True):
         if DEFAULT_CONFIG.loki_enabled:
             try:
                 import requests
@@ -777,7 +829,7 @@ elif page == "⚙️ Configuration":
         ]
     }
     
-    st.dataframe(pd.DataFrame(system_info), width='stretch', hide_index=True)
+    st.dataframe(pd.DataFrame(system_info), use_container_width=True, hide_index=True)
 
 # Footer
 st.divider()
