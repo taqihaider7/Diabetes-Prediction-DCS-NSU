@@ -1,0 +1,5 @@
+outs:
+- md5: 196cbefd3052074d8ca221405c9cb2a2
+  size: 207739
+  hash: md5
+  path: xgboost_best_model_20251027_161516.pkl
