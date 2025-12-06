@@ -24,14 +24,23 @@ class SharedMetricsStore:
             storage_dir: Directory to store metrics file
         """
         if storage_dir is None:
+            # Use absolute path to ensure both apps use the same location
             storage_dir = Path(__file__).parent.parent.parent / 'metrics'
         else:
             storage_dir = Path(storage_dir)
         
-        storage_dir.mkdir(exist_ok=True)
+        storage_dir.mkdir(parents=True, exist_ok=True)
         self.metrics_file = storage_dir / 'shared_metrics.json'
         self.lock_file = storage_dir / 'shared_metrics.lock'
         self._lock = threading.Lock()
+        
+        # Initialize file if it doesn't exist
+        if not self.metrics_file.exists():
+            self._write_metrics({
+                'predictions': [],
+                'errors': [],
+                'last_updated': datetime.now().isoformat()
+            })
     
     def _read_metrics(self) -> Dict[str, Any]:
         """Read metrics from file"""
