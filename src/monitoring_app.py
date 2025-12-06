@@ -559,7 +559,7 @@ elif page == "📈 Analytics":
         with col1:
             # Predictions over time
             df_time = df.set_index('timestamp')
-            df_hourly = df_time.resample('5T').size().reset_index()
+            df_hourly = df_time.resample('5min').size().reset_index()
             df_hourly.columns = ['Time', 'Count']
             
             fig = px.line(
@@ -575,7 +575,7 @@ elif page == "📈 Analytics":
         
         with col2:
             # Success rate over time
-            df_success = df_time.resample('5T')['success'].agg(['sum', 'count']).reset_index()
+            df_success = df_time.resample('5min')['success'].agg(['sum', 'count']).reset_index()
             df_success['success_rate'] = (df_success['sum'] / df_success['count'] * 100).fillna(0)
             
             fig = px.line(
@@ -586,7 +586,7 @@ elif page == "📈 Analytics":
                 markers=True
             )
             fig.update_traces(line_color='#51cf66', line_width=2)
-            fig.update_yaxis(range=[0, 100])
+            fig.update_yaxes(range=[0, 100])
             fig.update_layout(height=350)
             st.plotly_chart(fig, use_container_width=True)
         
